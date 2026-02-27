@@ -8,6 +8,5 @@ export default defineConfig({
     tailwindcss(),
   ],
   // Configuration pour GitHub Pages
-  // IMPORTANT : Remplacez 'tp-posts-comments' par le nom exact de VOTRE repo GitHub
-  base: process.env.NODE_ENV === 'production' ? '/tp-posts-comments/' : '/',
+  base: process.env.NODE_ENV === 'production' ? '/tp-supabase/' : '/',
 })

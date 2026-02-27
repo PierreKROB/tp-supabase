@@ -94,13 +94,35 @@ CREATE POLICY "comments_delete" ON comments FOR DELETE USING (
 );
 ```
 
-### 5. Activer le Realtime
+### 5. Créer la vue pour les utilisateurs
 
-Dans **Database → Replication**, activez :
-- ✅ `posts`
-- ✅ `comments`
+Dans **SQL Editor**, exécutez :
 
-### 6. Lancer en local
+```sql
+-- Créer une vue pour exposer les emails des utilisateurs
+CREATE OR REPLACE VIEW public.users AS
+SELECT id, email
+FROM auth.users;
+
+-- Donner les permissions de lecture
+GRANT SELECT ON public.users TO anon, authenticated;
+```
+
+### 6. Activer le Realtime
+
+Dans **SQL Editor**, exécutez :
+
+```sql
+-- Ajouter les tables à la publication realtime
+ALTER PUBLICATION supabase_realtime ADD TABLE posts;
+ALTER PUBLICATION supabase_realtime ADD TABLE comments;
+```
+
+### 7. Désactiver la confirmation d'email (optionnel, pour le développement)
+
+**Authentication → Providers → Email** → Désactivez **"Confirm email"** → Save
+
+### 8. Lancer en local
 
 ```bash
 npm run dev
@@ -110,35 +132,51 @@ npm run dev
 
 ## 🌐 Déploiement sur GitHub Pages
 
-### 1. Configurer le repo GitHub
-
-Dans **Settings → Pages** :
-- Source : **GitHub Actions**
-
-### 2. Ajouter les secrets
-
-Dans **Settings → Secrets and variables → Actions**, créez :
-- `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY`
-
-### 3. Modifier la base URL
-
-Dans `vite.config.js`, remplacez `/tp-posts-comments/` par le nom de votre repo :
-
-```js
-base: process.env.NODE_ENV === 'production' ? '/votre-nom-de-repo/' : '/',
-```
-
-### 4. Pusher sur GitHub
+### 1. Créer et pusher sur GitHub
 
 ```bash
+git init
 git add .
-git commit -m "Deploy to GitHub Pages"
-git push origin main
+git commit -m "Initial commit"
+git branch -M main
+git remote add origin https://github.com/VOTRE-USERNAME/tp-posts-comments.git
+git push -u origin main
 ```
 
-Le workflow se lance automatiquement et déploie sur :
-`https://votre-username.github.io/votre-repo/`
+### 2. Configurer GitHub Pages
+
+Sur GitHub.com, dans votre repo :
+- **Settings → Pages**
+- **Source** : Sélectionnez **GitHub Actions**
+
+### 3. Ajouter les secrets Supabase
+
+**Settings → Secrets and variables → Actions → New repository secret**
+
+Créez 2 secrets :
+- Nom : `VITE_SUPABASE_URL`
+  - Valeur : Votre URL Supabase (depuis `.env`)
+- Nom : `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY`
+  - Valeur : Votre clé anon Supabase (depuis `.env`)
+
+### 4. Vérifier vite.config.js
+
+Assurez-vous que la `base` correspond au nom de votre repo :
+
+```js
+base: process.env.NODE_ENV === 'production' ? '/tp-posts-comments/' : '/',
+```
+
+⚠️ Si votre repo a un nom différent, modifiez `/tp-posts-comments/` en conséquence.
+
+### 5. Déclencher le déploiement
+
+Le workflow GitHub Actions se lance automatiquement à chaque push sur `main`.
+
+**Onglet Actions** sur GitHub → Vérifiez que le workflow est vert ✅
+
+Votre site sera disponible sur :
+`https://VOTRE-USERNAME.github.io/tp-posts-comments/`
 
 ## 👤 Test avec un compte admin
 

@@ -1,10 +1,31 @@
 import { useNavigate, useLocation } from 'react-router'
 import { Button } from '@heroui/react'
-import { FileText, BarChart3, LogOut, ShieldCheck, LogIn } from 'lucide-react'
+import { FileText, LogOut, ShieldCheck, LogIn, Moon, Sun } from 'lucide-react'
+import { useState, useEffect } from 'react'
 
 export default function Navbar({ session, isAdmin, signOut }) {
   const navigate = useNavigate()
   const { pathname } = useLocation()
+  const [darkMode, setDarkMode] = useState(false)
+
+  useEffect(() => {
+    const saved = localStorage.getItem('darkMode') === 'true'
+    setDarkMode(saved)
+    if (saved) {
+      document.documentElement.classList.add('dark')
+    }
+  }, [])
+
+  const toggleDarkMode = () => {
+    const newMode = !darkMode
+    setDarkMode(newMode)
+    localStorage.setItem('darkMode', newMode)
+    if (newMode) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+  }
 
   return (
     <nav className="flex items-center justify-between px-6 py-4 border-b border-divider">
@@ -36,6 +57,14 @@ export default function Navbar({ session, isAdmin, signOut }) {
 
       {/* User info */}
       <div className="flex gap-2 items-center">
+        <Button 
+          variant="light" 
+          size="sm" 
+          isIconOnly
+          onPress={toggleDarkMode}
+        >
+          {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+        </Button>
         {session ? (
           <>
             <span className="text-sm text-default-500">{session.user.email}</span>

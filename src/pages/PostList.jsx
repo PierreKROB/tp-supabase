@@ -5,23 +5,33 @@ import PostForm from '../components/PostForm'
 import CommentList from '../components/CommentList'
 import CommentForm from '../components/CommentForm'
 import { Button, Card, Spinner } from '@heroui/react'
-import { MessageSquare, Trash2, LogIn } from 'lucide-react'
+import { MessageSquare, Trash2, LogIn, X } from 'lucide-react'
 
 export default function PostList({ session, isAdmin }) {
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
   const [openPostId, setOpenPostId] = useState(null)
-
-  // Debug : afficher l'état admin
-  console.log('🔍 Debug:', { 
-    email: session?.user?.email, 
-    isAdmin, 
-    shouldBeAdmin: session?.user?.email?.endsWith('@admin.mydomain.com')
-  })
+  const [commentCounts, setCommentCounts] = useState({})
+  const [lightboxImage, setLightboxImage] = useState(null)
 
   const fetchPosts = async () => {
     const { data } = await getPosts()
     setPosts(data ?? [])
+    
+    if (data) {
+      const counts = {}
+      await Promise.all(
+        data.map(async (post) => {
+          const { count } = await supabase
+            .from('comments')
+            .select('*', { count: 'exact', head: true })
+            .eq('post_id', post.id)
+          counts[post.id] = count || 0
+        })
+      )
+      setCommentCounts(counts)
+    }
+    
     setLoading(false)
   }
 
@@ -30,6 +40,7 @@ export default function PostList({ session, isAdmin }) {
     const channel = supabase
       .channel('posts-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, fetchPosts)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'comments' }, fetchPosts)
       .subscribe()
     return () => supabase.removeChannel(channel)
   }, [])
@@ -64,16 +75,33 @@ export default function PostList({ session, isAdmin }) {
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   )}
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onPress={() => setOpenPostId(openPostId === post.id ? null : post.id)}
-                    startContent={<MessageSquare className="w-4 h-4" />}
+                  <button 
+                    onClick={() => setOpenPostId(openPostId === post.id ? null : post.id)}
+                    className="relative flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-default-100 dark:hover:bg-default-50 transition-colors group border border-transparent hover:border-default-200"
                   >
-                    {openPostId === post.id ? 'Masquer' : 'Voir'}
-                  </Button>
+                    <MessageSquare className="w-4 h-4 text-default-500 group-hover:text-primary transition-colors" />
+                    {commentCounts[post.id] !== undefined && (
+                      <span className={
+                        commentCounts[post.id] > 0 
+                          ? "text-sm font-bold text-primary" 
+                          : "text-sm text-default-400"
+                      }>
+                        {commentCounts[post.id]}
+                      </span>
+                    )}
+                  </button>
                 </div>
               </div>
+              
+              {post.image_url && (
+                <img 
+                  src={post.image_url} 
+                  alt={post.title}
+                  className="mt-3 w-full max-h-96 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                  onClick={() => setLightboxImage(post.image_url)}
+                />
+              )}
+              
               <p className="mt-2">{post.content}</p>
               {openPostId === post.id && (
                 <div className="mt-4 border-t pt-4 space-y-3">
@@ -106,6 +134,26 @@ export default function PostList({ session, isAdmin }) {
           </Card>
         ))}
       </div>
+      
+      {lightboxImage && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+          onClick={() => setLightboxImage(null)}
+        >
+          <button
+            className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
+            onClick={() => setLightboxImage(null)}
+          >
+            <X className="w-6 h-6" />
+          </button>
+          <img 
+            src={lightboxImage} 
+            alt="Agrandir"
+            className="max-w-full max-h-full object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   )
 }

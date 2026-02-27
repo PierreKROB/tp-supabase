@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button, Input, TextArea, TextField, Label, Card } from '@heroui/react'
+import { Button, Input, TextArea, Card } from '@heroui/react'
 import { createPost } from '../services/posts'
 
 export default function PostForm({ session }) {
@@ -24,14 +24,23 @@ export default function PostForm({ session }) {
         <Card.Title>Nouveau post</Card.Title>
       </Card.Header>
       <Card.Content className="flex flex-col gap-3">
-        <TextField value={title} onChange={setTitle}>
-          <Label>Titre</Label>
-          <Input placeholder="Titre du post" />
-        </TextField>
-        <TextField value={content} onChange={setContent}>
-          <Label>Contenu</Label>
-          <TextArea placeholder="Écrivez votre post..." rows={3} />
-        </TextField>
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium">Titre</label>
+          <Input 
+            placeholder="Titre du post" 
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium">Contenu</label>
+          <TextArea 
+            placeholder="Écrivez votre post..." 
+            rows={3}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+          />
+        </div>
         {error && <p className="text-red-500 text-sm">{error}</p>}
         <Button color="primary" onPress={handleSubmit} isLoading={loading}>
           Publier

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../supabase'
-import { Button, Input, Tabs, TextField, Label, Card } from '@heroui/react'
+import { Button, Input, Tabs, Card } from '@heroui/react'
 
 export default function Auth() {
   const [email, setEmail] = useState('')
@@ -26,14 +26,24 @@ export default function Auth() {
 
   const fields = (
     <div className="flex flex-col gap-4 mt-4">
-      <TextField value={email} onChange={setEmail}>
-        <Label>Email</Label>
-        <Input placeholder="vous@example.com" type="email" />
-      </TextField>
-      <TextField value={password} onChange={setPassword}>
-        <Label>Mot de passe</Label>
-        <Input placeholder="••••••••" type="password" />
-      </TextField>
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-medium">Email</label>
+        <Input 
+          placeholder="vous@example.com" 
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+      </div>
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-medium">Mot de passe</label>
+        <Input 
+          placeholder="••••••••" 
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+      </div>
       {error && <p className="text-red-500 text-sm">{error}</p>}
     </div>
   )

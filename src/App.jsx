@@ -4,6 +4,7 @@ import Navbar from './components/Navbar'
 import Auth from './components/Auth'
 import PostList from './pages/PostList'
 import Stats from './pages/Stats'
+import NotFound from './pages/NotFound'
 
 export default function App() {
   const { session, loading, isAdmin, signOut } = useAuth()
@@ -15,9 +16,10 @@ export default function App() {
       <Navbar session={session} isAdmin={isAdmin} signOut={signOut} />
       <main className="max-w-3xl mx-auto px-4 py-8">
         <Routes>
-          <Route path="/" element={session ? <PostList session={session} isAdmin={isAdmin} /> : <Auth />} />
+          <Route path="/" element={<PostList session={session} isAdmin={isAdmin} />} />
+          <Route path="/login" element={session ? <Navigate to="/" /> : <Auth />} />
           <Route path="/stats" element={<Stats />} />
-          <Route path="*" element={<Navigate to="/" />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
     </BrowserRouter>

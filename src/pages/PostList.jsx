@@ -58,7 +58,7 @@ export default function PostList({ session, isAdmin }) {
               <div className="flex justify-between items-start">
                 <div className="flex-1">
                   <h3 className="font-bold text-lg">{post.title}</h3>
-                  <p className="text-gray-400 text-xs mt-1">{post.author?.email} · {new Date(post.created_at).toLocaleDateString()}</p>
+                  <p className="text-gray-400 text-xs mt-1">{post.author_email || post.author?.email} · {new Date(post.created_at).toLocaleDateString()}</p>
                 </div>
                 <div className="flex gap-2">
                   {isAdmin && (

@@ -8,5 +8,5 @@ export default defineConfig({
     tailwindcss(),
   ],
   // Configuration pour GitHub Pages
-  base: process.env.NODE_ENV === 'production' ? '/tp-supabase/' : '/',
+  base: '/tp-supabase/'
 })
